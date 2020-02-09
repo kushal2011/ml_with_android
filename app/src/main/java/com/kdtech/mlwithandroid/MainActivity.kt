@@ -5,6 +5,8 @@ import android.graphics.BitmapFactory
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import com.google.firebase.ml.common.modeldownload.FirebaseModelDownloadConditions
+import com.google.firebase.ml.common.modeldownload.FirebaseModelManager
 import com.google.firebase.ml.custom.*
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.BufferedReader
@@ -20,9 +22,36 @@ class MainActivity : AppCompatActivity() {
             .setAssetFilePath("model_unquant.tflite")
             .build()
 
-        val options = FirebaseModelInterpreterOptions.Builder(localModel).build()
+        val remoteModel = FirebaseCustomRemoteModel.Builder("model_unquant").build()
 
-        val interpreter = FirebaseModelInterpreter.getInstance(options)
+        val conditions = FirebaseModelDownloadConditions.Builder()
+            .requireWifi()
+            .build()
+        FirebaseModelManager.getInstance().download(remoteModel, conditions)
+            .addOnCompleteListener {
+                // Success.
+            }
+
+        var interpreter:FirebaseModelInterpreter
+        FirebaseModelManager.getInstance().isModelDownloaded(remoteModel)
+            .addOnSuccessListener { isDownloaded ->
+                val options =
+                    if (isDownloaded) {
+                        FirebaseModelInterpreterOptions.Builder(remoteModel).build()
+                    } else {
+                        FirebaseModelInterpreterOptions.Builder(localModel).build()
+                    }
+                interpreter = FirebaseModelInterpreter.getInstance(options)!!
+                identifyImage(interpreter)
+            }
+
+//        val options = FirebaseModelInterpreterOptions.Builder(localModel).build()
+//
+//        val interpreter = FirebaseModelInterpreter.getInstance(options)
+
+    }
+
+    private fun identifyImage(interpreter: FirebaseModelInterpreter) {
 
         val inputOutputOptions = FirebaseModelInputOutputOptions.Builder()
             .setInputFormat(0, FirebaseModelDataType.FLOAT32, intArrayOf(1, 224, 224, 3))
@@ -56,7 +85,7 @@ class MainActivity : AppCompatActivity() {
         val inputs = FirebaseModelInputs.Builder()
             .add(input) // add() as many input arrays as your model requires
             .build()
-        interpreter!!.run(inputs, inputOutputOptions)
+        interpreter.run(inputs, inputOutputOptions)
             .addOnSuccessListener { result ->
                 // ...
                 val output = result.getOutput<Array<FloatArray>>(0)
@@ -80,4 +109,5 @@ class MainActivity : AppCompatActivity() {
                 tvIdentifiedItem.text = "exception ${e.message}"
             }
     }
+
 }
