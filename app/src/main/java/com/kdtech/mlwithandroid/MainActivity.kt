@@ -29,7 +29,6 @@ class MainActivity : AppCompatActivity() {
             .setOutputFormat(0, FirebaseModelDataType.FLOAT32, intArrayOf(1, 2)) // here replace 2 with no of class added in your model , for production apps you can read the labels.txt files here and to get no of classes dynamically
             .build()
 
-
         /* Here we are using static image from drawable to keep the code minimum and avoid distraction,
          Recommended method would be to get the image from user by camera or device photos using
           the same code by handling all this logic in a method and calling that every time */
