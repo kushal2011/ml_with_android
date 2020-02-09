@@ -30,7 +30,10 @@ class MainActivity : AppCompatActivity() {
             .build()
 
 
-        /* Here we are using static image from drawable to keep the code minimum and avoid distraction, Recommended method would be to get the image from user by camera or device photos using the same code by handling all this logic in a method and calling that every time */
+        /* Here we are using static image from drawable to keep the code minimum and avoid distraction,
+         Recommended method would be to get the image from user by camera or device photos using
+          the same code by handling all this logic in a method and calling that every time */
+
         val bitmap = Bitmap.createScaledBitmap(
             BitmapFactory.decodeResource(
                 resources,
